@@ -3,12 +3,14 @@ import java.net.*;
 
 public class Servidor {
     public static void main(String[] args) {
-        if (args.length < 2) {
+        // Comprovem que hi ha almenys 2 arguments (port i paraula clau)
+    	if (args.length < 2) {
             System.out.println("Uso: java Servidor <puerto> <palabra_clave_servidor>");
             return;
         }
 
         int puerto;
+        // Convertim el primer argument a numero (port)
         try {
             puerto = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
@@ -16,28 +18,35 @@ public class Servidor {
             return;
         }
 
+        // Guardem la paraula clau del servidor
         String serverKeyword = args[1];
 
         System.out.println("PORT_SERVIDOR: " + puerto);
         System.out.println("PARAULA_CLAU_SERVIDOR: \"" + serverKeyword + "\"");
         System.out.println("Server chat at port " + puerto);
 
+        // Creem el ServerSocket (el servidor escolta connexions)
         try (ServerSocket servidor = new ServerSocket(puerto)) {
             System.out.println("Inicializing server... OK");
             System.out.println("Servidor esperando conexion...");
 
+            // Accepta una connexio d un client (espera fins que arriba)
             try (Socket socket = servidor.accept();
-                 BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                 PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader console = new BufferedReader(new InputStreamReader(System.in))) {
+                // Flux d entrada des del client
+             	BufferedReader socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                // Flux de sortida cap al client
+            	PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
+            	// Flux per llegir del teclat
+            	BufferedReader console = new BufferedReader(new InputStreamReader(System.in))) {
 
                 System.out.println("Connection from client... OK");
-
+                // Llegim la paraula clau del client
                 String clientKeyword = socketIn.readLine();
                 if (clientKeyword == null) {
                     System.out.println("No se recibio la palabra clave del cliente.");
                     return;
                 }
+             // Enviem la paraula clau del servidor al client
                 socketOut.println(serverKeyword);
 
                 System.out.println("Inicializing chat... OK");
@@ -61,7 +70,7 @@ public class Servidor {
                         System.out.println("No se pudo leer del teclado.");
                         break;
                     }
-
+                    // Si la resposta te la paraula clau, acabem
                     socketOut.println(respuesta);
                     if (respuesta.equals(serverKeyword) || respuesta.equals(clientKeyword)) {
                         System.out.println("Server keyword detected!");
